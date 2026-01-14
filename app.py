@@ -120,11 +120,11 @@ st.markdown("""
 # =========================================================
 if 'paso' not in st.session_state:
     st.session_state.paso = 1
-    st.session_state.scroll_trigger = 0 # Variable para forzar recarga del script
+    st.session_state.scroll_trigger = 0
 
 def siguiente_paso(): 
     st.session_state.paso = 2
-    st.session_state.scroll_trigger += 1 # Cambiamos esto para engañar a Streamlit
+    st.session_state.scroll_trigger += 1
 
 def paso_anterior(): 
     st.session_state.paso = 1
@@ -135,16 +135,16 @@ def paso_anterior():
 # =========================================================
 if st.session_state.paso == 1:
     
-    # Script para asegurar scroll arriba al volver (con key dinámica)
+    # CORRECCIÓN: Metemos el trigger DENTRO del script como comentario
     components.html(
         f"""
             <script>
+                // Trigger: {st.session_state.scroll_trigger}
                 window.parent.document.querySelector('section.main').scrollTo(0, 0);
                 window.parent.document.querySelector('[data-testid="stAppViewContainer"]').scrollTo(0, 0);
             </script>
         """, 
-        height=0, 
-        key=f"scroll_top_1_{st.session_state.scroll_trigger}"
+        height=0
     )
 
     st.markdown("<h1 style='text-align: center; margin-bottom: 10px;'>Calculadora de Seguros de Vida</h1>", unsafe_allow_html=True)
@@ -195,30 +195,29 @@ if st.session_state.paso == 1:
 # =========================================================
 elif st.session_state.paso == 2:
     
-    # --- SCROLL NUCLEAR (Versión con KEY ÚNICA) ---
-    # Al ponerle key=..., Streamlit cree que es un componente nuevo y lo ejecuta SIEMPRE.
-    js_scroll = """
+    # CORRECCIÓN: Metemos el trigger DENTRO del script como comentario
+    js_scroll = f"""
         <script>
-            function forceScroll() {
+            // Trigger: {st.session_state.scroll_trigger}
+            function forceScroll() {{
                 var doc = window.parent.document;
                 var selectors = ['section.main', '[data-testid="stAppViewContainer"]'];
                 
-                selectors.forEach(function(s) {
+                selectors.forEach(function(s) {{
                     var el = doc.querySelector(s);
-                    if (el) { el.scrollTop = 0; }
-                });
-            }
-            // Ejecutar 50 veces rápido para asegurar que gane a la carga visual
+                    if (el) {{ el.scrollTop = 0; }}
+                }});
+            }}
+            
             var count = 0;
-            var interval = setInterval(function() {
+            var interval = setInterval(function() {{
                 forceScroll();
                 count++;
                 if (count > 20) clearInterval(interval);
-            }, 50);
+            }}, 50);
         </script>
     """
-    # IMPORTANTE: La 'key' cambia cada vez que entras aquí, forzando la ejecución
-    components.html(js_scroll, height=0, key=f"scroll_res_{st.session_state.scroll_trigger}")
+    components.html(js_scroll, height=0)
 
     d = st.session_state.datos
     
